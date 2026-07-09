@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Union Budget Visualizer (2013 - 2026)</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Custom Styling -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-icon">
+          <i data-lucide="trending-up" class="neon-glow"></i>
+        </div>
+        <div class="logo-text">
+          <h1>FinScope</h1>
+          <span>Budget Analytics (2013-26)</span>
+        </div>
+      </div>
+      <nav class="nav-menu">
+        <button class="nav-item active" data-tab="overview">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Overview</span>
+        </button>
+        <button class="nav-item" data-tab="analyzer">
+          <i data-lucide="landmark"></i>
+          <span>Ministry Analyzer</span>
+        </button>
+        <button class="nav-item" data-tab="yearly">
+          <i data-lucide="pie-chart"></i>
+          <span>Yearly Breakdown</span>
+        </button>
+        <button class="nav-item" data-tab="compare">
+          <i data-lucide="columns-2"></i>
+          <span>Share Comparison</span>
+        </button>
+        <button class="nav-item" data-tab="table-view">
+          <i data-lucide="table-properties"></i>
+          <span>Data Table</span>
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="source-info">
+          <i data-lucide="info"></i>
+          <span>Data source: Union Budget of India official reports</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top header bar -->
+      <header class="top-bar">
+        <div class="header-title">
+          <h2 id="tab-title">Overview Dashboard</h2>
+          <p id="tab-subtitle">Key fiscal statistics and trends of the last decade</p>
+        </div>
+        <div class="theme-badge">
+          <i data-lucide="sparkles" class="accent-text"></i>
+          <span>Premium Edition</span>
+        </div>
+      </header>
+
+      <!-- Content Container -->
+      <div class="content-body">
+        
+        <!-- ================= OVERVIEW TAB ================= -->
+        <section id="overview" class="tab-pane active">
+          <!-- Metric Cards Grid -->
+          <div class="metrics-grid">
+            <div class="metric-card glass-card">
+              <div class="card-icon blue-glow"><i data-lucide="wallet"></i></div>
+              <div class="card-info">
+                <h3>Latest Total Outlay</h3>
+                <h2 id="outlay-val">₹0 Cr</h2>
+                <span class="trend positive" id="outlay-trend"><i data-lucide="arrow-up-right"></i> 0% (YoY)</span>
+              </div>
+            </div>
+            <div class="metric-card glass-card">
+              <div class="card-icon purple-glow"><i data-lucide="line-chart"></i></div>
+              <div class="card-info">
+                <h3>13-Year Avg Outlay</h3>
+                <h2 id="avg-outlay-val">₹0 Cr</h2>
+                <span class="trend-label">Combined Major Ministries</span>
+              </div>
+            </div>
+            <div class="metric-card glass-card">
+              <div class="card-icon green-glow"><i data-lucide="shield-check"></i></div>
+              <div class="card-info">
+                <h3>Highest Funded Sector</h3>
+                <h2 id="top-ministry-val">-</h2>
+                <span class="trend-label" id="top-ministry-percent">0% of total outlay</span>
+              </div>
+            </div>
+            <div class="metric-card glass-card">
+              <div class="card-icon yellow-glow"><i data-lucide="activity"></i></div>
+              <div class="card-info">
+                <h3>Overall CAGR</h3>
+                <h2>10.51%</h2>
+                <span class="trend-label">Growth Rate (2013 - 2026)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts Row -->
+          <div class="charts-row">
+            <div class="chart-container glass-card large-chart">
+              <div class="chart-header">
+                <h4>Total Outlay Trend (10 Ministries Aggregated)</h4>
+                <span class="subtitle">Values in ₹ Crores (Cr)</span>
+              </div>
+              <div class="chart-wrapper">
+                <canvas id="overviewTrendChart"></canvas>
+              </div>
+            </div>
+            <div class="chart-container glass-card small-chart">
+              <div class="chart-header">
+                <h4>Budget Share (Latest Year)</h4>
+                <span class="subtitle">Percentage breakdown</span>
+              </div>
+              <div class="chart-wrapper">
+                <canvas id="overviewShareChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= MINISTRY ANALYZER TAB ================= -->
+        <section id="analyzer" class="tab-pane">
+          <!-- Selection Bar -->
+          <div class="selector-bar glass-card">
+            <div class="form-group">
+              <label for="ministry-select"><i data-lucide="landmark"></i> Select Ministry</label>
+              <select id="ministry-select" class="custom-select"></select>
+            </div>
+          </div>
+
+          <!-- Statistics Grid -->
+          <div class="metrics-grid">
+            <div class="metric-card glass-card">
+              <div class="card-icon blue-glow"><i data-lucide="coins"></i></div>
+              <div class="card-info">
+                <h3>Average Outlay</h3>
+                <h2 id="m-avg-val">₹0 Cr</h2>
+                <span class="trend-label">Annual average allocation</span>
+              </div>
+            </div>
+            <div class="metric-card glass-card">
+              <div class="card-icon purple-glow"><i data-lucide="trophy"></i></div>
+              <div class="card-info">
+                <h3>Peak Outlay Year</h3>
+                <h2 id="m-peak-val">-</h2>
+                <span class="trend-label" id="m-peak-year">Budget Year</span>
+              </div>
+            </div>
+            <div class="metric-card glass-card">
+              <div class="card-icon green-glow"><i data-lucide="arrow-up-right"></i></div>
+              <div class="card-info">
+                <h3>Growth Since 2013</h3>
+                <h2 id="m-growth-val">0%</h2>
+                <span class="trend-label">Total cumulative growth</span>
+              </div>
+            </div>
+            <div class="metric-card glass-card">
+              <div class="card-icon yellow-glow"><i data-lucide="percent"></i></div>
+              <div class="card-info">
+                <h3>Avg Share of Budget</h3>
+                <h2 id="m-share-val">0%</h2>
+                <span class="trend-label">Relative to 10 ministries</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts Row -->
+          <div class="charts-row">
+            <div class="chart-container glass-card large-chart">
+              <div class="chart-header">
+                <h4 id="analyzer-chart-title">Ministry Outlay Trend</h4>
+                <span class="subtitle">Values in ₹ Crores (Cr)</span>
+              </div>
+              <div class="chart-wrapper">
+                <canvas id="ministryTrendChart"></canvas>
+              </div>
+            </div>
+            <div class="chart-container glass-card small-chart">
+              <div class="chart-header">
+                <h4>Average Budget Share</h4>
+                <span class="subtitle">Relative Outlay Distribution</span>
+              </div>
+              <div class="chart-wrapper">
+                <canvas id="ministryShareChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= YEARLY BREAKDOWN TAB ================= -->
+        <section id="yearly" class="tab-pane">
+          <!-- Selection Bar -->
+          <div class="selector-bar glass-card">
+            <div class="form-group">
+              <label for="year-select"><i data-lucide="calendar"></i> Select Fiscal Year</label>
+              <select id="year-select" class="custom-select"></select>
+            </div>
+          </div>
+
+          <!-- Yearly statistics row -->
+          <div class="charts-row">
+            <div class="chart-container glass-card medium-chart">
+              <div class="chart-header">
+                <h4 id="yearly-chart-title">Outlay Distribution</h4>
+                <span class="subtitle">Percentage share of total budget</span>
+              </div>
+              <div class="chart-wrapper flex-center">
+                <canvas id="yearlyPieChart"></canvas>
+              </div>
+            </div>
+            
+            <div class="info-panel glass-card medium-chart">
+              <div class="panel-header">
+                <h4>Yearly Budget Insights</h4>
+                <span class="subtitle" id="yearly-insights-sub">Fiscal Year Outlays</span>
+              </div>
+              <div class="insights-body">
+                <div class="insight-stat">
+                  <span>Total Consolidated Budget</span>
+                  <h3 id="year-total-outlay">₹0 Cr</h3>
+                </div>
+                <div class="insight-stat">
+                  <span>YoY Budget Expansion</span>
+                  <h3 id="year-growth-rate">0%</h3>
+                </div>
+                <div class="top-list-container">
+                  <h5>Top 3 Budget Allocations</h5>
+                  <ol class="top-list" id="yearly-top-list">
+                    <!-- Dynamic List items -->
+                  </ol>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= COMPARISON TAB ================= -->
+        <section id="compare" class="tab-pane">
+          <!-- Double Selection Dropdowns -->
+          <div class="selector-bar glass-card compare-bar">
+            <div class="form-group">
+              <label for="compare-year-a"><i data-lucide="calendar"></i> Base Year (A)</label>
+              <select id="compare-year-a" class="custom-select"></select>
+            </div>
+            <div class="compare-divider"><i data-lucide="arrow-right-left"></i></div>
+            <div class="form-group">
+              <label for="compare-year-b"><i data-lucide="calendar"></i> Target Year (B)</label>
+              <select id="compare-year-b" class="custom-select"></select>
+            </div>
+          </div>
+
+          <!-- Comparison charts side-by-side -->
+          <div class="charts-row">
+            <div class="chart-container glass-card half-chart">
+              <div class="chart-header">
+                <h4 id="compare-title-a">Base Year (A) Distribution</h4>
+                <span class="subtitle">Ministry allocations</span>
+              </div>
+              <div class="chart-wrapper">
+                <canvas id="comparePieChartA"></canvas>
+              </div>
+            </div>
+            <div class="chart-container glass-card half-chart">
+              <div class="chart-header">
+                <h4 id="compare-title-b">Target Year (B) Distribution</h4>
+                <span class="subtitle">Ministry allocations</span>
+              </div>
+              <div class="chart-wrapper">
+                <canvas id="comparePieChartB"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Analysis Panel -->
+          <div class="chart-container glass-card full-width-card">
+            <div class="chart-header">
+              <h4>Ministry Share Shift & Absolute Growth Analysis</h4>
+              <span class="subtitle">Detailing redistribution metrics and percentage growth from Base Year (A) to Target Year (B)</span>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table compare-table">
+                <thead>
+                  <tr>
+                    <th>Ministry</th>
+                    <th>Base Year Outlay (₹ Cr)</th>
+                    <th>Target Year Outlay (₹ Cr)</th>
+                    <th>Absolute Growth (₹ Cr)</th>
+                    <th>Growth (%)</th>
+                    <th>Share Shift (%)</th>
+                  </tr>
+                </thead>
+                <tbody id="compare-table-body">
+                  <!-- Dynamic rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= DATA TABLE TAB ================= -->
+        <section id="table-view" class="tab-pane">
+          <!-- Table Controls -->
+          <div class="table-controls glass-card">
+            <div class="search-box">
+              <i data-lucide="search"></i>
+              <input type="text" id="table-search" placeholder="Search ministry or year...">
+            </div>
+            <button id="btn-export-csv" class="btn btn-primary btn-glow">
+              <i data-lucide="download"></i>
+              <span>Export CSV</span>
+            </button>
+          </div>
+
+          <!-- Actual Table -->
+          <div class="chart-container glass-card full-width-card">
+            <div class="table-responsive">
+              <table class="data-table main-budget-table" id="raw-budget-table">
+                <thead>
+                  <tr>
+                    <th class="sortable" data-sort="ministry">Ministry <i data-lucide="chevrons-up-down"></i></th>
+                    <th class="sortable" data-sort="year">Year <i data-lucide="chevrons-up-down"></i></th>
+                    <th class="sortable text-right" data-sort="outlay">Outlay (₹ Crores) <i data-lucide="chevrons-up-down"></i></th>
+                    <th class="sortable text-right" data-sort="share">Share of Year Budget <i data-lucide="chevrons-up-down"></i></th>
+                  </tr>
+                </thead>
+                <tbody id="table-body">
+                  <!-- Dynamically Rendered Rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Custom logic script -->
+  <script src="app.js"></script>
+</body>
+</html>
